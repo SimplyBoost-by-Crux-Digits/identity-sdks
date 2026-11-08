@@ -6,7 +6,7 @@ passes the signature to SimplyBoost; the assistant knows who it is talking to an
 the customer's name in the inbox. For customer portals, dealer portals, B2B webshops and any
 site with its own login.
 
-- Zero dependencies, typed (`py.typed`), Python 3.9+
+- Zero dependencies, typed (`py.typed`), Python 3.10+
 - Signs exactly what the SimplyBoost server verifies, checked against
   [shared test vectors](https://github.com/SimplyBoost-by-Crux-Digits/identity-sdks/blob/main/test-vectors.json)
 
