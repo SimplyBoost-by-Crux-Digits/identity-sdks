@@ -1,0 +1,96 @@
+{
+  "description": "Shared test vectors for the SimplyBoost widget identity signature. Every SDK must produce exactly these user_hash values. Generated with compute_widget_hmac from the SimplyBoost server; do not edit by hand.",
+  "rule": "user_hash = hex(HMAC_SHA256(utf8(secret), utf8(lower(strip(email)) + ':' + str(ts))))",
+  "ttl_seconds": 600,
+  "skew_seconds": 60,
+  "vectors": [
+    {
+      "name": "plain lowercase email",
+      "secret": "sb_test_secret_do_not_use_in_production",
+      "email": "jane.doe@example.com",
+      "ts": 1792768282,
+      "normalized_email": "jane.doe@example.com",
+      "user_hash": "a0bc31d4003f1a3c6f4dc9a4bbc57da843aa5c30a66777069c2aac8bc43ec85f"
+    },
+    {
+      "name": "mixed case is lowercased",
+      "secret": "sb_test_secret_do_not_use_in_production",
+      "email": "Jane.Doe@Example.COM",
+      "ts": 1792768282,
+      "normalized_email": "jane.doe@example.com",
+      "user_hash": "a0bc31d4003f1a3c6f4dc9a4bbc57da843aa5c30a66777069c2aac8bc43ec85f"
+    },
+    {
+      "name": "surrounding ASCII whitespace is trimmed",
+      "secret": "sb_test_secret_do_not_use_in_production",
+      "email": "  jane.doe@example.com\t\n",
+      "ts": 1792768282,
+      "normalized_email": "jane.doe@example.com",
+      "user_hash": "a0bc31d4003f1a3c6f4dc9a4bbc57da843aa5c30a66777069c2aac8bc43ec85f"
+    },
+    {
+      "name": "non-breaking and ideographic spaces are trimmed",
+      "secret": "sb_test_secret_do_not_use_in_production",
+      "email": "\u00a0jane.doe@example.com\u3000",
+      "ts": 1792768282,
+      "normalized_email": "jane.doe@example.com",
+      "user_hash": "a0bc31d4003f1a3c6f4dc9a4bbc57da843aa5c30a66777069c2aac8bc43ec85f"
+    },
+    {
+      "name": "control separators and NEL are trimmed like Python str.strip",
+      "secret": "sb_test_secret_do_not_use_in_production",
+      "email": "\u001cjane.doe@example.com\u0085",
+      "ts": 1792768282,
+      "normalized_email": "jane.doe@example.com",
+      "user_hash": "a0bc31d4003f1a3c6f4dc9a4bbc57da843aa5c30a66777069c2aac8bc43ec85f"
+    },
+    {
+      "name": "a byte-order mark is not whitespace and stays in the signed email",
+      "secret": "sb_test_secret_do_not_use_in_production",
+      "email": "\ufeffjane.doe@example.com",
+      "ts": 1792768282,
+      "normalized_email": "\ufeffjane.doe@example.com",
+      "user_hash": "8aa024045a3ba3c4cfa63a9cf6a87b3424e2819c2f5f809d0f18430ef7529679"
+    },
+    {
+      "name": "plus addressing and subdomain",
+      "secret": "sb_test_secret_do_not_use_in_production",
+      "email": "Dealer+Portal@Mail.Linktour-Parts.example",
+      "ts": 1700000000,
+      "normalized_email": "dealer+portal@mail.linktour-parts.example",
+      "user_hash": "7e2c0e43e789b25e915fd84e211771919485fab05558873faa853cf71e59c56a"
+    },
+    {
+      "name": "accented letters are lowercased",
+      "secret": "sb_test_secret_do_not_use_in_production",
+      "email": "\u00c9LODIE.M\u00fcller@Example.de",
+      "ts": 1792768282,
+      "normalized_email": "\u00e9lodie.m\u00fcller@example.de",
+      "user_hash": "6f717143a5517df274574e3d82babc85a62f5fe23e1e6d525c2b577d3689421a"
+    },
+    {
+      "name": "non-ASCII secret is UTF-8 encoded",
+      "secret": "\u00e4nother-s\u00e9cret-\ud83d\udd11",
+      "email": "jane.doe@example.com",
+      "ts": 1792768282,
+      "normalized_email": "jane.doe@example.com",
+      "user_hash": "1e937a56fed26bd4d6da6011b5d3548ee8aeb95d8f50f3aba4c29f65a80f3af6"
+    },
+    {
+      "name": "ten-digit timestamp at the epoch boundary",
+      "secret": "sb_test_secret_do_not_use_in_production",
+      "email": "jane.doe@example.com",
+      "ts": 1000000000,
+      "normalized_email": "jane.doe@example.com",
+      "user_hash": "49354475d1675d3bc06665449b2a48d2b3e18eca508b6aa72847624c2586191e"
+    },
+    {
+      "name": "eleven-digit timestamp",
+      "secret": "sb_test_secret_do_not_use_in_production",
+      "email": "jane.doe@example.com",
+      "ts": 10000000000,
+      "normalized_email": "jane.doe@example.com",
+      "user_hash": "c2e51c114bc73d1bc1736ee69ed34ed62960d8e71802c39c3fae0550a2f00c81"
+    }
+  ]
+}

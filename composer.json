@@ -1,0 +1,70 @@
+{
+    "name": "simplyboost/identity",
+    "description": "Laravel chat widget user identity verification: HMAC-sign the logged-in user's email for the SimplyBoost AI chat widget. Blade directive, component and refresh route; works in plain PHP too.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "chat widget",
+        "chatbot",
+        "identity verification",
+        "user identity",
+        "hmac",
+        "user_hash",
+        "blade",
+        "customer portal",
+        "ai assistant",
+        "simplyboost"
+    ],
+    "homepage": "https://simplyboost.io/docs/verified-visitors",
+    "authors": [
+        {
+            "name": "Crux Digits B.V. (SimplyBoost)",
+            "email": "hello@simplyboost.io",
+            "homepage": "https://simplyboost.io"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/SimplyBoost-by-Crux-Digits/identity-sdks/issues",
+        "source": "https://github.com/SimplyBoost-by-Crux-Digits/identity-sdks",
+        "docs": "https://simplyboost.io/docs/verified-visitors"
+    },
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "ext-json": "*",
+        "ext-mbstring": "*"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^10.0 || ^11.0",
+        "phpunit/phpunit": "^9.6 || ^10.5 || ^11.5 || ^12.0"
+    },
+    "suggest": {
+        "laravel/framework": "For the Blade directive, the <x-simplyboost-widget /> component and the refresh route (Laravel 12 or 13)."
+    },
+    "autoload": {
+        "psr-4": {
+            "SimplyBoost\\Identity\\": "php/src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SimplyBoost\\Identity\\Tests\\": "php/tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SimplyBoost\\Identity\\Laravel\\SimplyBoostServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:core": "phpunit --testsuite core"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

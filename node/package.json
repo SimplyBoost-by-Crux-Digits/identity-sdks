@@ -1,0 +1,62 @@
+{
+  "name": "@simplyboost/identity",
+  "version": "1.0.0",
+  "description": "HMAC identity verification for the SimplyBoost AI chat widget: sign the logged-in user's email in Node.js, Express or Next.js.",
+  "keywords": [
+    "simplyboost",
+    "chat widget",
+    "chatbot",
+    "identity verification",
+    "user identity",
+    "hmac",
+    "user_hash",
+    "express",
+    "nextjs",
+    "customer portal",
+    "ai assistant"
+  ],
+  "homepage": "https://simplyboost.io/docs/verified-visitors",
+  "bugs": "https://github.com/SimplyBoost-by-Crux-Digits/identity-sdks/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SimplyBoost-by-Crux-Digits/identity-sdks.git",
+    "directory": "node"
+  },
+  "license": "MIT",
+  "author": "Crux Digits B.V. (SimplyBoost) <hello@simplyboost.io> (https://simplyboost.io)",
+  "sideEffects": false,
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "npm run clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && node scripts/mark-module-types.mjs",
+    "test": "npm run build && node --test test/identity.test.mjs",
+    "prepublishOnly": "npm test"
+  },
+  "devDependencies": {
+    "@types/node": "18.19.130",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,11 @@
+vendor/
+composer.lock
+.phpunit.cache/
+.phpunit.result.cache
+node/node_modules/
+node/dist/
+*.tgz
+python/build/
+python/dist/
+*.egg-info/
+__pycache__/

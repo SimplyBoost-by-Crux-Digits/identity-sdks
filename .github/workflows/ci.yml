@@ -1,0 +1,128 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  php:
+    name: PHP ${{ matrix.php }} ${{ matrix.testbench && format('/ Testbench {0}', matrix.testbench) || '(core)' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Plain PHP: the core classes, without Laravel.
+          - php: '7.4'
+          - php: '8.0'
+          - php: '8.1'
+          # Laravel 12 (Testbench 10) and Laravel 13 (Testbench 11).
+          - php: '8.2'
+            testbench: '^10.0'
+          - php: '8.3'
+            testbench: '^10.0'
+          - php: '8.3'
+            testbench: '^11.0'
+          - php: '8.4'
+            testbench: '^11.0'
+          - php: '8.5'
+            testbench: '^11.0'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, json
+          coverage: none
+          tools: composer:v2
+      - run: composer validate --strict
+      - name: Every PHP file parses on this version
+        run: find php/src php/config -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Install (core only)
+        if: ${{ !matrix.testbench }}
+        run: |
+          composer remove --dev orchestra/testbench --no-update --no-interaction
+          composer update --prefer-dist --no-interaction --no-progress
+      - name: Install (Laravel)
+        if: ${{ matrix.testbench }}
+        run: |
+          composer require --dev "orchestra/testbench:${{ matrix.testbench }}" --no-update --no-interaction
+          composer update --prefer-dist --no-interaction --no-progress -W
+      - name: Test (core)
+        if: ${{ !matrix.testbench }}
+        run: vendor/bin/phpunit --testsuite core
+      - name: Test (core + Laravel)
+        if: ${{ matrix.testbench }}
+        run: vendor/bin/phpunit
+
+  php-archive:
+    name: Composer archive holds only the PHP package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: No other languages, tests or CI in the archive
+        run: |
+          git archive --format=tar HEAD | tar -t > files.txt
+          cat files.txt
+          if grep -E '^(node|python|php/tests|php/examples|\.github)/' files.txt; then
+            echo "::error::.gitattributes export-ignore is missing an entry"; exit 1
+          fi
+          grep -qx 'php/src/Identity.php' files.txt
+          grep -qx 'php/config/simplyboost.php' files.txt
+
+  node:
+    name: Node.js ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['18', '20', '22', '24']
+    defaults:
+      run:
+        working-directory: node
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: node/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm pack --dry-run
+      - name: LICENSE matches the repository's
+        run: cmp LICENSE ../LICENSE
+
+  python:
+    name: Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
+    defaults:
+      run:
+        working-directory: python
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install --upgrade pip build==1.3.0 twine==6.2.0
+      - run: python -m build
+      - run: python -m twine check --strict dist/*
+      - name: Test the built wheel, not the source tree
+        run: |
+          python -m pip install dist/*.whl
+          cd tests && python -m unittest discover -s . -v
+      - name: LICENSE matches the repository's
+        run: cmp LICENSE ../LICENSE
